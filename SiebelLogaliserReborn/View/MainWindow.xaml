@@ -36,6 +36,140 @@
         </Grid>
         <Grid Grid.Row="1">
             <TabControl>
+                <TabItem Header="Info">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="True">
+                        <StackPanel DataContext="{Binding LogInfo}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="LogEol/LogXLateMsgs"/>
+                                <Label Grid.Column="1" Content="{Binding LogEolXlate}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Log Created"/>
+                                <Label Grid.Column="1" Content="{Binding StartDate}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Log Ended"/>
+                                <Label Grid.Column="1" Content="{Binding EndDate}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Server Time Zone"/>
+                                <Label Grid.Column="1" Content="{Binding TimeZone}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="String Count in hex"/>
+                                <Label Grid.Column="1" Content="{Binding StringsHex}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Segment Number in hex"/>
+                                <Label Grid.Column="1" Content="{Binding SegmentHex}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="LogEntryFlgs"/>
+                                <Label Grid.Column="1" Content="{Binding LogEntryFlgs}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Count Of LogFileDelim"/>
+                                <Label Grid.Column="1" Content="{Binding LogFileDelimCnt}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="ASCII Code of LogFileDelim in hex"/>
+                                <Label Grid.Column="1" Content="{Binding LogFileDelim}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Component Name"/>
+                                <Label Grid.Column="1" Content="{Binding ComponentName}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Session ID"/>
+                                <Label Grid.Column="1" Content="{Binding SessionId}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Process ID"/>
+                                <Label Grid.Column="1" Content="{Binding ProcessId}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Thread ID"/>
+                                <Label Grid.Column="1" Content="{Binding ThreadId}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="File Name"/>
+                                <Label Grid.Column="1" Content="{Binding FileName}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Siebel Version"/>
+                                <Label Grid.Column="1" Content="{Binding VersionInfo}"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Locale"/>
+                                <Label Grid.Column="1" Content="{Binding Locale}"/>
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
                 <TabItem Header="SQL">
                     <DataGrid ItemsSource="{Binding dsData.Tables[0]}"/>
                 </TabItem>

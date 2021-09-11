@@ -30,6 +30,16 @@ namespace SiebelLogaliserReborn.ViewModel
                }
         }
 
+        private Model.FileProcessor fileProcessor;
+        
+        private Model.LogInfo _logInfo;
+        public Model.LogInfo LogInfo {
+            get { return _logInfo; }
+            set {
+                _logInfo = value;
+                OnPropertyChanged(nameof(LogInfo));
+            }
+        } 
         public ICommand OpenFile {
             get {
                 return new Model.DelegateCommand((obj) => {
@@ -37,6 +47,8 @@ namespace SiebelLogaliserReborn.ViewModel
                     if (fName != "")
                     {
                         FileName = fName;
+                        fileProcessor = new Model.FileProcessor();
+                        LogInfo = fileProcessor.GetLogInfo(fName);
                     }
                 });
             }
@@ -47,8 +59,7 @@ namespace SiebelLogaliserReborn.ViewModel
             {
                 return new Model.DelegateCommand((obj) =>
                 {
-                    dsData = new Model.FileProcessor().ProcessFile(FileName);
-                    //MessageBox.Show(dsData.ToString());
+                    dsData = fileProcessor.ProcessFile(FileName);
                 }, (obj)=>_fileName!=null);
             }
         }
