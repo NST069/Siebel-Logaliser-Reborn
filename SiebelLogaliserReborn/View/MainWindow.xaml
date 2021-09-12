@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SiebelLogaliserReborn"
         xmlns:viewmodels="clr-namespace:SiebelLogaliserReborn.ViewModel"
         mc:Ignorable="d"
-        Title="SiebelLogaliser Reborn" Height="450" Width="800">
+        Title="SiebelLogaliser Reborn" Height="600" Width="800">
     <Window.DataContext>
         <viewmodels:MainViewModel/>
     </Window.DataContext>
@@ -14,6 +14,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
@@ -170,16 +171,25 @@
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>
-                <TabItem Header="SQL">
-                    <DataGrid ItemsSource="{Binding dsData.Tables[0]}"/>
+                <TabItem Header="SQL" DataContext="{Binding dsData}">
+                    <DataGrid ItemsSource="{Binding Tables[SQL]}"/>
                 </TabItem>
-                <TabItem Header="Log">
-                    <DataGrid ItemsSource="{Binding dsData.Tables[1]}"/>
+                <TabItem Header="Log" DataContext="{Binding dsData}">
+                    <DataGrid ItemsSource="{Binding Tables[Log]}"/>
                 </TabItem>
-                <TabItem Header="Err">
-                    <DataGrid ItemsSource="{Binding dsData.Tables[2]}"/>
+                <TabItem Header="Error" DataContext="{Binding dsData}">
+                    <DataGrid ItemsSource="{Binding Tables[Error]}"/>
                 </TabItem>
             </TabControl>
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar Grid.Column="0" Minimum="0" Maximum="{Binding FileSizeStr}" Value="{Binding CurPosition}"/>
+            <!--<Label Content="{Binding CurPosition}"/>-->
+            <Label Grid.Column="1" Content="{Binding ElapsedTimeDisp}"/>
         </Grid>
     </Grid>
 </Window>

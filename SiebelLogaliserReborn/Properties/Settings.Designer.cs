@@ -67,5 +67,14 @@ namespace SiebelLogaliserReborn.Properties {
                 return ((string)(this["SQLInsertExecLine"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("***** SQL Statement Prepare Time")]
+        public string SQLPrepareExecLine {
+            get {
+                return ((string)(this["SQLPrepareExecLine"]));
+            }
+        }
     }
 }

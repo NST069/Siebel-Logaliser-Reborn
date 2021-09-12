@@ -68,8 +68,8 @@
     <Compile Include="Model\FileHandler.cs" />
     <Compile Include="Model\FileProcessor.cs" />
     <Compile Include="Model\LogInfo.cs" />
+    <Compile Include="Model\LogLine.cs" />
     <Compile Include="Model\mdlGeneric.cs" />
-    <Compile Include="Model\SiebLog.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

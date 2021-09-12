@@ -15,5 +15,8 @@ namespace SiebelLogaliserReborn.Model
             if (ofd.ShowDialog() == true) return ofd.FileName;
             return "";
         }
+        public static long TotalLines(string filename) {
+            return System.IO.File.ReadAllLines(filename).Length;
+        }
     }
 }
