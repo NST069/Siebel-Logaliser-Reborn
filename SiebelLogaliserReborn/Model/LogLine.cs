@@ -1,69 +1,69 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace SiebelLogaliserReborn.Model
 {
-    static class LogLine
-    {
+    class LogLine : INotifyPropertyChanged
+	{
+		private DateTime _prevTimestamp;
+		public DateTime PrevTimestamp
+		{
+			get { return _prevTimestamp; }
+			set
+			{
+				_prevTimestamp = value;
+				OnPropertyChanged(nameof(PrevTimestamp));
+			}
+		}
+		private DateTime _curTimestamp;
+		public DateTime CurTimestamp
+		{
+			get { return _curTimestamp; }
+			set
+			{
+				_curTimestamp = value;
+				OnPropertyChanged(nameof(CurTimestamp));
+			}
+		}
+		private double _timeDiff;
+		public double TimeDiff
+		{
+			get { return _timeDiff; }
+			set
+			{
+				_timeDiff = value;
+				OnPropertyChanged(nameof(TimeDiff));
+			}
+		}
+		private long _prevLine;
+		public long PrevLine
+		{
+			get { return _prevLine; }
+			set
+			{
+				_prevLine = value;
+				OnPropertyChanged(nameof(PrevLine));
+			}
+		}
+		public LogLine(DateTime prev_ts, DateTime cur_ts, double time_diff, long Line)
+		{
+			this.PrevTimestamp = prev_ts;
+			this.CurTimestamp = cur_ts;
+			this.TimeDiff = time_diff;
+			this.PrevLine = Line;
+		}
 
 
-        public static string[] TryParseLine(string Line) {
-            try
-            {
-                string[] logLn = Line.Split('\t');
-                int logLevel = int.Parse(logLn[2]);
-                DateTime ts;
-                DateTime.TryParseExact(logLn[4], "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out ts);
-                return logLn;
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-        }
+		public event PropertyChangedEventHandler PropertyChanged;
 
-        /*
-        public static logLine? TryParseLine(string Line)
-        {
-            try
-            {
-                string[] logLn = Line.Split('\t');
-                logLine l = new logLine();
-                l._evtTypeAlias = logLn[0];
-                l._evtSubtype = logLn[1];
-                l._logLevel=int.Parse(logLn[2]);
-                l._sarmId = logLn[3];
-                DateTime.TryParseExact(logLn[4], "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out l._timestamp);
-                l._logMessage = logLn[5];
-
-                return l;
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-        }
-
-        public struct logLine {
-            public string _evtTypeAlias;
-            public string _evtSubtype;
-            public int _logLevel;
-            public string _sarmId;
-            public DateTime _timestamp;
-            public string _logMessage;
-            public string _query;//if caught SQL tags
-
-            public void AddStringToQuery(string str) {
-                _query += str.TrimEnd() + "\n";
-            }
-
-            public void AddBindVars(string pos, string var) {
-                
-            }
-        }
-        */
-    }
+		protected void OnPropertyChanged([CallerMemberName] String info = "")
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(info));
+		}
+	}
 }

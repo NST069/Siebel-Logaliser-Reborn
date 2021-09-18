@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
@@ -23,29 +24,17 @@ namespace SiebelLogaliserReborn.ViewModel
             }
         }
 
-        private DataSet _dsData;
-        public DataSet dsData {
-            /*get { return _dsData; }
-            set {
-                _dsData = value;
-                OnPropertyChanged(nameof(dsData));
-               }*/
-            get { return fileProcessor?.dsSQLSet; }
-            set {
-                fileProcessor.dsSQLSet = value;
-                OnPropertyChanged(nameof(dsData));
+        private Model.FileProcessor _fileProcessor;
+        public Model.FileProcessor fileProcessor
+        {
+            get { return _fileProcessor; }
+            set
+            {
+                _fileProcessor = value;
+                OnPropertyChanged(nameof(fileProcessor));
             }
         }
 
-        private Model.FileProcessor fileProcessor;
-        //public Model.FileProcessor fileProcessor {
-        //    get { return _fileProcessor; }
-        //    set {
-        //        _fileProcessor = value;
-        //        OnPropertyChanged(nameof(fileProcessor));
-        //    }
-        //}
-        
         private Model.LogInfo _logInfo;
         public Model.LogInfo LogInfo {
             get { return _logInfo; }
@@ -68,7 +57,7 @@ namespace SiebelLogaliserReborn.ViewModel
             get { return ElapsedTime.ToString("mm:ss"); }
         }
 
-        private long _fileSizeStr;
+        private long _fileSizeStr=999;
         public long FileSizeStr {
             get { return _fileSizeStr; }
             set {
@@ -77,14 +66,8 @@ namespace SiebelLogaliserReborn.ViewModel
             }
         }
 
-        private long _curPosition;
         public long CurPosition
-        {/*
-            get { return _curPosition; }
-            set {
-                _curPosition = value;
-                OnPropertyChanged(nameof(CurPosition));
-            }*/
+        {
             get { return (fileProcessor!=null)?fileProcessor.lLineNo:0; }
             set {
                 fileProcessor.lLineNo = value;
@@ -124,10 +107,7 @@ namespace SiebelLogaliserReborn.ViewModel
                 {
                     ThreadPool.QueueUserWorkItem(o =>
                     {
-                        dsData = null;
                         DateTime start = DateTime.Now;
-                        //FileSizeStr = 100;
-                        //CurPosition = 50;
                         bool isExecuting = true;
                         ThreadPool.QueueUserWorkItem(j =>
                         {
@@ -140,8 +120,7 @@ namespace SiebelLogaliserReborn.ViewModel
                                 Thread.Sleep(100);
                             }
                         }, isExecuting);
-                        dsData = fileProcessor.ProcessFile(FileName);
-                        //CurPosition = 100;
+                        fileProcessor.ProcessFile(FileName);
                         isExecuting = false;
                         DateTime end = DateTime.Now;
                         TimeSpan ts = TimeSpan.FromSeconds((end - start).TotalSeconds);

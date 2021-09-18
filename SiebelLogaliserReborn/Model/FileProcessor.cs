@@ -9,55 +9,42 @@ using System.Windows;
 using System.Runtime.CompilerServices;
 using System.ComponentModel;
 using System.Windows.Threading;
+using System.Collections.ObjectModel;
 
 namespace SiebelLogaliserReborn.Model
 {
 	class FileProcessor : INotifyPropertyChanged
 	{
-		private DataSet _dsSQLSet;
-		public DataSet dsSQLSet
-		{
-			get { return _dsSQLSet; }
-			set
-			{
-				_dsSQLSet = value;
-				OnPropertyChanged(nameof(dsSQLSet));
+		private ObservableCollection<SQLLine> _sqlLines;
+		public ObservableCollection<SQLLine> SqlLines {
+			get { return _sqlLines; }
+			set {
+				_sqlLines = value;
+				OnPropertyChanged(nameof(SqlLines));
 			}
 		}
 
-		private DataTable _dtSQL;
-		public DataTable dtSQL
+		private ObservableCollection<ErrLine> _errLines;
+		public ObservableCollection<ErrLine> ErrLines
 		{
-			get { return _dtSQL; }
+			get { return _errLines; }
 			set
 			{
-				_dtSQL = value;
-				OnPropertyChanged(nameof(dtSQL));
-			}
-		}
-		private DataTable _dtLog;
-		public DataTable dtLog
-		{
-			get { return _dtLog; }
-			set
-			{
-				_dtLog = value;
-				OnPropertyChanged(nameof(dtLog));
+				_errLines = value;
+				OnPropertyChanged(nameof(ErrLines));
 			}
 		}
 
-		private DataTable _dtLogErr; 
-		public DataTable dtLogErr
+		private ObservableCollection<LogLine> _logLines;
+		public ObservableCollection<LogLine> LogLines
 		{
-			get { return _dtLogErr; }
+			get { return _logLines; }
 			set
 			{
-				_dtLogErr = value;
-				OnPropertyChanged(nameof(dtLogErr));
+				_logLines = value;
+				OnPropertyChanged(nameof(LogLines));
 			}
 		}
-
-
 
 		private TextReader trReader;
 
@@ -76,13 +63,21 @@ namespace SiebelLogaliserReborn.Model
 
 		public bool bStopThread = false;
 
+		public FileProcessor() {
+			SqlLines = new ObservableCollection<SQLLine>();
+			ErrLines = new ObservableCollection<ErrLine>();
+			LogLines = new ObservableCollection<LogLine>();
+		}
 		
-		public DataSet ProcessFile(String fileName, int iSQLExecDiff = 0, int iLogExecDiff = 0)
+		public void ProcessFile(string fileName, int iSQLExecDiff = 0, int iLogExecDiff = 0)
 		{
 			//https://docs.oracle.com/cd/E14004_01/books/SysDiag/SysDiagEvntLogAdmin14.html
-			// Main function that loops through all lines, collects required information in three datatables of a single dataset
-			bool bLog = false;
-
+			bool bLog = true;
+			App.Current.Dispatcher.Invoke(()=>{
+				SqlLines.Clear();
+				ErrLines.Clear();
+				LogLines.Clear();
+			});
 
 			logInfo = new LogInfo();
 			try
@@ -100,7 +95,7 @@ namespace SiebelLogaliserReborn.Model
 				int iTempPos = 0;
 				int iErrCodePos = 0;
 				double dTimeDiff = 0;
-				double dSQLTime = 0;
+				//double dSQLTime = 0;
 				bool bRecording = false;
 				bool bLineProcessed = false;
 
@@ -125,15 +120,12 @@ namespace SiebelLogaliserReborn.Model
 					logInfo.ParseLogInfo(sLine);
 					lLineNo++;
 
-					// initialize data tables
-					CreateDataTable(bLog);
-
-					while (!(sLine == null || bStopThread)) //TODO: Fix Query recording
+					while (!(sLine == null || bStopThread))
 					{
 						
 						if (sLine.Length > 0 && lLineNo > 1)
 						{
-							string[] l = Model.LogLine.TryParseLine(sLine);
+							string[] l = TryParseLine(sLine);
 							
 							bLineProcessed = true;
 							//SQL
@@ -187,7 +179,11 @@ namespace SiebelLogaliserReborn.Model
 								//{
 								iTempPos = sSQL.IndexOf(Environment.NewLine + Environment.NewLine);
 								//first blank line in this string represents the position where SQL has ended
-								dtSQL.Rows.Add(sSQLId, sSQLTime, "1", sSQLTime, sSQL/*.Substring(0, iTempPos)*/, sBindVars.Substring(0), lSQLStartLineNo);
+								
+								App.Current.Dispatcher.Invoke(() =>
+								{
+									SqlLines.Add(new SQLLine(sSQLId, sSQLTime, "1", sSQLTime, sSQL/*.Substring(0, iTempPos)*/, sBindVars.Substring(0), lSQLStartLineNo));
+								});
 								//}
 								sBindVars = "";
 								sSQL = "";
@@ -224,7 +220,10 @@ namespace SiebelLogaliserReborn.Model
 												// Collect info only if transaction time >= user specified time
 												if ((dTimeDiff > iLogExecDiff))
 												{
-													dtLog.Rows.Add(dtPrevDateTime.ToString("dd-MMM-yy HH:mm:ss"), dtCurDateTime.ToString("dd-MMM-yy HH:mm:ss"), dTimeDiff, lPrevLineNo);
+													App.Current.Dispatcher.Invoke(() =>
+													{
+														LogLines.Add(new LogLine(dtPrevDateTime, dtCurDateTime, dTimeDiff, lPrevLineNo));
+													});
 												}
 											}
 											lPrevLineNo = lLineNo;
@@ -242,7 +241,10 @@ namespace SiebelLogaliserReborn.Model
 								iErrCodePos = l[5].IndexOf("SBL");
 								DateTime ts;
 								DateTime.TryParseExact(l[4], "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out ts);
-								dtLogErr.Rows.Add(ts, (iErrCodePos > 0) ? l[5].Substring(iErrCodePos, 13) : "", l[5], lLineNo);
+								App.Current.Dispatcher.Invoke(() =>
+								{
+									ErrLines.Add(new ErrLine(ts, (iErrCodePos > 0) ? l[5].Substring(iErrCodePos, 13) : "", l[5], lLineNo));
+								});
 							}
 						}
 						sLine = srRead.ReadLine();
@@ -258,10 +260,8 @@ namespace SiebelLogaliserReborn.Model
 
 
                 // Remove duplicates and aggregate
-                if (dsSQLSet.Tables["SQL"].Rows.Count > 0)
-                    ScrubDataTable(ref _dsSQLSet, "SQL", "SQL");
-
-                //AddDummyRow(ref dsSQLSet);
+                //if (dsSQLSet.Tables["SQL"].Rows.Count > 0)
+                //    ScrubDataTable(ref _dsSQLSet, "SQL", "SQL");
 
             }
             catch (Exception ex)
@@ -273,7 +273,6 @@ namespace SiebelLogaliserReborn.Model
 				slStopThread = null;
 
 			}
-			return dsSQLSet;
 		}
 
 		public string ProcessFile(string sFileName, bool MultiThread)
@@ -292,7 +291,6 @@ namespace SiebelLogaliserReborn.Model
 				{
 					fs = new FileStream(sFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 					trReader = TextReader.Synchronized(new StreamReader(fs));
-					dsSQLSet = new DataSet();
 				}
 
 			}
@@ -325,133 +323,22 @@ namespace SiebelLogaliserReborn.Model
 			}
 			return null;
 		}
-		private void CreateDataTable(bool CreateLogSpecificInfo)
+		
+		public static string[] TryParseLine(string Line)
 		{
-			// initialize all datatables. The name specified here should be the same as name specified in individual columns in datagridview
 			try
 			{
-				DataColumn dCol = null;
-
-				this.dsSQLSet = null;
-				this.dsSQLSet = new DataSet();
-				this.dtSQL = new DataTable("SQL");
-
-				this.dsSQLSet.Tables.Add(this.dtSQL);
-				dCol = this.dtSQL.Columns.Add("SQLId");
-				dCol.Caption = "SQL Id";
-				dCol = this.dtSQL.Columns.Add("ExecTime");
-				dCol.Caption = "Exec Id";
-				dCol = this.dtSQL.Columns.Add("ExecNo");
-				dCol.Caption = "#";
-				dCol = this.dtSQL.Columns.Add("TotalExecTime");
-				dCol.Caption = "Total";
-				dCol = this.dtSQL.Columns.Add("SQL");
-				dCol.Caption = "SQL";
-				dCol = this.dtSQL.Columns.Add("BindVar");
-				dCol.Caption = "Bind Var";
-				dCol = this.dtSQL.Columns.Add("Line");
-				dCol.Caption = "Line";
-
-				// Following lines dont play a role in case of spool. However they are executed so that a table is available for validation
-				this.dtLog = new DataTable("Log");
-				this.dsSQLSet.Tables.Add(this.dtLog);
-				dCol = this.dtLog.Columns.Add("LogStart");
-				dCol.Caption = "Start";
-				dCol = this.dtLog.Columns.Add("LogEnd");
-				dCol.Caption = "End";
-				dCol = this.dtLog.Columns.Add("LogTimeTaken");
-				dCol.Caption = "Exec Time";
-				dCol = this.dtLog.Columns.Add("LogLine");
-				dCol.Caption = "Line";
-
-				this.dtLogErr = new DataTable("Error");
-				this.dsSQLSet.Tables.Add(this.dtLogErr);
-				dCol = this.dtLogErr.Columns.Add("LogErrStart");
-				dCol.Caption = "Start";
-				dCol = this.dtLogErr.Columns.Add("LogErrCode");
-				dCol.Caption = "Error Code";
-				dCol = this.dtLogErr.Columns.Add("LogErrError");
-				dCol.Caption = "Error";
-				dCol = this.dtLogErr.Columns.Add("LogErrLine");
-				dCol.Caption = "Line";
+				string[] logLn = Line.Split('\t');
+				int logLevel = int.Parse(logLn[2]);
+				DateTime ts;
+				DateTime.TryParseExact(logLn[4], "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out ts);
+				return logLn;
 			}
-			catch (Exception Ex)
+			catch (Exception e)
 			{
-				MessageBox.Show(Ex.ToString());
+				return null;
 			}
 		}
-
-		private void ScrubDataTable(ref DataSet dsData, string TableName, string GroupColumn)
-		{
-			// Remove duplicates and do aggregation
-			// to-do: Evaluate using linq for this, or find a better way
-			DataTable dtTemp = null;
-			DataTable dtData = null;
-			DataRow drCur = null;
-			DataRow drPrev = null;
-			int lCtr = 0;
-
-			try
-			{
-				dtData = dsData.Tables[TableName];
-				dtData.DefaultView.Sort = GroupColumn;
-				dtTemp = dtData.Clone();
-				drPrev = dtData.Rows[0];
-
-				// to-do: This is specific to processing SQL, generalise
-				for (lCtr = 1; lCtr <= dtData.Rows.Count - 1; lCtr++)
-				{
-					drCur = dtData.Rows[lCtr];
-					if (drCur[GroupColumn] == drPrev[GroupColumn])
-					{
-						if (Convert.ToDouble(drCur["ExecTime"]) > Convert.ToDouble(drPrev["ExecTime"]))
-						{
-							drPrev["SQLId"] = drCur["SQLId"];
-							drPrev["ExecTime"] = drCur["ExecTime"];
-							drPrev["BindVar"] = drCur["BindVar"];
-							drPrev["Line"] = drCur["Line"];
-						}
-						drPrev["ExecNo"] = Convert.ToInt32(drPrev["ExecNo"]) + 1;
-						drPrev["TotalExecTime"] = Convert.ToDouble(drPrev["TotalExecTime"]) + Convert.ToDouble(drCur["ExecTime"]);
-					}
-					else
-					{
-						dtTemp.ImportRow(drPrev);
-						drPrev = drCur;
-					}
-
-				}
-				dtTemp.ImportRow(drPrev);
-				dtTemp.AcceptChanges();
-
-				dsData.Tables.Remove(TableName);
-				dsData.Tables.Add(dtTemp);
-
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.ToString());
-			}
-			finally
-			{
-				drCur = null;
-				drPrev = null;
-				dtTemp = null;
-
-			}
-		}
-
-		private void AddDummyRow(ref DataSet dsData)
-		{
-			// create dummy rows to display in UI when there is no data
-			if (dsData.Tables["SQL"].Rows.Count <= 0)
-				dsData.Tables["SQL"].Rows.Add("", "", "", "", "No data to display. Hurray!", "", "");
-			if (dsData.Tables["Log"].Rows.Count <= 0)
-				dsData.Tables["Log"].Rows.Add("", "No data to display. Hurray!", "", "");
-			if (dsData.Tables["Error"].Rows.Count <= 0)
-				dsData.Tables["Error"].Rows.Add("", "No errors. Something's wrong!", "", "");
-		}
-
 
 
 		public event PropertyChangedEventHandler PropertyChanged;

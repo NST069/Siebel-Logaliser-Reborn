@@ -24,5 +24,12 @@ namespace SiebelLogaliserReborn
         {
             InitializeComponent();
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Model.SQLLine sqlLine = (sender as Button).DataContext as Model.SQLLine;
+            View.QueryPopup q = new View.QueryPopup(sqlLine.SQL+"\n=====\nBinds:\n"+sqlLine.BindVar);/////
+            q.Show();
+        }
     }
 }
