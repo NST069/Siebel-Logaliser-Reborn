@@ -73,6 +73,7 @@ namespace SiebelLogaliserReborn.Model
 		{
 			//https://docs.oracle.com/cd/E14004_01/books/SysDiag/SysDiagEvntLogAdmin14.html
 			bool bLog = true;
+			slStopThread = new object();
 			App.Current.Dispatcher.Invoke(()=>{
 				SqlLines.Clear();
 				ErrLines.Clear();
@@ -230,7 +231,7 @@ namespace SiebelLogaliserReborn.Model
 											dtPrevDateTime = dtCurDateTime;
 										}
 									}
-									catch (Exception e) { }
+									catch (Exception e) { MessageBox.Show(e.Message); }
 								}
 							}
 							//
@@ -249,13 +250,13 @@ namespace SiebelLogaliserReborn.Model
 						}
 						sLine = srRead.ReadLine();
 						lLineNo+=1;
-						// check whether process needs to be stopped. This happens when user hits 'Cancel' button
-						//lock (slStopThread)
-						//{
-						//	if (bStopThread)
-						//		bStopThread = true;
-						//}
-					}
+                        // check whether process needs to be stopped. This happens when user hits 'Cancel' button
+                        lock (slStopThread)
+                        {
+                            if (bStopThread)
+                                bStopThread = true;
+                        }
+                    }
 				}
 
 
